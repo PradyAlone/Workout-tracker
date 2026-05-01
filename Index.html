@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Workout Tracker</title>
+<style>
+  :root{
+    /* Dark grey gradient backdrop and luxurious glass palette */
+    --bg-1: #2b2b2f;
+    --bg-2: #1f1f23;
+    --glass-1: rgba(255,255,255,0.03);
+    --glass-2: rgba(255,255,255,0.015);
+    --muted: #9aa4b2;
+    --accent: #ffd400;
+    --accent-2: #ffcf33;
+    --accent-dark: #2b2200;
+    --success: #2ecc71;
+    --danger: #ff4d4f;
+    --rest: #6b7280;
+    --card-radius: 18px;
+    --glass-blur: 18px;
+    --shadow: 0 40px 100px rgba(0,0,0,0.7);
+    --heat-size: 14px;
+    --heat-gap: 6px;
+    --max-width: 980px;
+    --gap: 20px;
+    --ui-ease: cubic-bezier(.2,.9,.2,1);
+  }
+
+  /* Base */
+  html,body{
+    height:100%;
+    margin:0;
+    background:
+      radial-gradient(900px 420px at 8% 8%, rgba(0,0,0,0.12), transparent),
+      linear-gradient(180deg,var(--bg-2) 0%, var(--bg-1) 100%);
+    color:#e9eef3;
+    font-family:-apple-system,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  .wrap{max-width:var(--max-width);margin:28px auto;padding:22px;box-sizing:border-box}
+
+  header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  .logo{
+    width:68px;height:68px;border-radius:14px;
+    background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);
+    font-weight:800;color:var(--accent);font-size:22px;letter-spacing:1px;
+  }
+  h1{font-size:20px;margin:0}
+  .sub{color:var(--muted);font-size:13px;margin-top:4px;max-width:640px}
+
+  .stack{display:flex;flex-direction:column;gap:var(--gap)}
+  @media(max-width:720px){ .wrap{padding:16px} }
+
+  /* Ultra-glassy dark cards */
+  .card{
+    background: linear-gradient(180deg,var(--glass-1),var(--glass-2));
+    border-radius:var(--card-radius);padding:18px;box-shadow:var(--shadow);
+    backdrop-filter: blur(var(--glass-blur));border:1px solid rgba(255,255,255,0.03);
+  }
+
+  .main{display:flex;flex-direction:column;gap:18px;align-items:stretch}
+  .today-row{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .today-left{min-width:220px;flex:1}
+  .today-date{font-size:20px;font-weight:800;letter-spacing:0.2px;color:#fff}
+  .today-sub{color:var(--muted);font-size:13px;margin-top:6px}
+
+  .today-panel{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;padding:28px;border-radius:16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.03);
+  }
+
+  .workout-type{font-size:36px;font-weight:900;color:var(--accent);letter-spacing:0.6px;margin-bottom:6px;text-transform:none;text-shadow: 0 10px 30px rgba(255,212,0,0.06);}
+  .workout-sub{color:var(--muted);font-size:13px}
+
+  .action-area{display:flex;gap:12px;align-items:center}
+  .btn-primary{
+    background: linear-gradient(180deg,var(--accent),var(--accent-2));
+    color:var(--accent-dark); border:0;padding:18px 30px;border-radius:16px;font-weight:900;cursor:pointer;font-size:16px;
+    box-shadow: 0 26px 80px rgba(255,212,0,0.14), inset 0 -4px 12px rgba(0,0,0,0.12);
+    transition: transform .12s var(--ui-ease), box-shadow .18s var(--ui-ease);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 36px 110px rgba(255,212,0,0.18) }
+  .btn-secondary{ background:transparent;border:1px solid rgba(255,255,255,0.04);padding:12px 14px;border-radius:12px;color:var(--muted);cursor:pointer;transition:transform .12s var(--ui-ease); }
+  .btn-secondary:hover{ transform:translateY(-1px) }
+
+  .controls{display:flex;gap:12px;flex-wrap:wrap}
+  .controls > div{min-width:160px;flex:1}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  input[type="date"], select{ width:100%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03); background:transparent;color:#fff;font-size:14px;outline:none; }
+
+  .stats{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .stat{flex:1;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));text-align:center;border:1px solid rgba(255,255,255,0.02)}
+  .stat strong{display:block;font-size:18px;color:#fff}
+  .small{font-size:12px;color:var(--muted)}
+
+  .upcoming{ display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02); }
+  .upcoming .row{ display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;cursor:pointer;transition:background .12s; gap:12px; }
+  .upcoming .row:hover{ background: rgba(255,255,255,0.02) }
+  .upcoming .date{ font-weight:700; color:#fff }
+  .upcoming .type{ color:var(--muted) }
+
+  .points{ display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02); }
+  .points .score{ font-size:28px;font-weight:900;color:var(--accent);text-shadow:0 8px 24px rgba(255,212,0,0.06) }
+  .points .details{ display:flex;gap:12px;flex-wrap:wrap }
+  .points .detail{ flex:1;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center }
+  .points .detail strong{ display:block;font-size:18px;color:#fff }
+
+  .heat-wrap{overflow:auto;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
+  .heat-svg{width:100%;overflow:visible}
+  .heat-tooltip{position:fixed;pointer-events:none;background:linear-gradient(180deg,#0b0b0d,#050507);border-radius:8px;padding:10px 12px;box-shadow:0 20px 60px rgba(0,0,0,0.6);font-size:13px;color:#fff;display:none;z-index:9999}
+
+  .history{max-height:260px;overflow:auto;padding-right:6px}
+  .entry{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;margin-bottom:8px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
+  .tag{padding:6px 8px;border-radius:8px;font-size:13px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.02);color:#fff}
+
+  button:focus, input:focus, select:focus { outline:none; box-shadow:0 0 0 6px rgba(255,212,0,0.06) }
+
+  @media(max-width:520px){
+    .today-panel{flex-direction:column;align-items:flex-start}
+    .action-area{width:100%;flex-direction:column}
+    .btn-primary{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">WT</div>
+    <div style="flex:1;min-width:0">
+      <h1>Workout Tracker</h1>
+      <div class="sub">Today is the focus. Quick mark, upcoming schedule, and points at a glance.</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-weight:700;color:var(--muted);font-size:13px">Chest • Back • Shoulders • Legs</div>
+    </div>
+  </header>
+
+  <div class="stack">
+    <div class="card main" id="mainCard">
+      <div class="today-row">
+        <div class="today-left">
+          <div class="today-date" id="todayLabel">Loading…</div>
+          <div class="today-sub" id="todaySub">—</div>
+        </div>
+
+        <div style="flex:1">
+          <div class="today-panel">
+            <div>
+              <div class="workout-type" id="workoutType">—</div>
+              <div class="workout-sub" id="workoutNote">Tap MARK DONE when finished</div>
+            </div>
+
+            <div style="min-width:120px;text-align:center">
+              <div class="small">Status</div>
+              <div style="margin-top:8px;font-weight:800" id="statusPill">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-area">
+          <button class="btn-primary" id="markDone">MARK DONE</button>
+          <button class="btn-secondary" id="markMissed">Mark Missed</button>
+        </div>
+      </div>
+
+      <div style="margin-top:6px" class="controls">
+        <div>
+          <label for="startDate">Start Date</label>
+          <input id="startDate" type="date" />
+        </div>
+        <div>
+          <label for="viewDate">Selected Date</label>
+          <input id="viewDate" type="date" />
+        </div>
+        <div>
+          <label for="overrideType">Override</label>
+          <select id="overrideType">
+            <option value="">Keep expected</option>
+            <option value="Chest+Triceps">Chest+Triceps</option>
+            <option value="Back+Biceps">Back+Biceps</option>
+            <option value="Shoulders+Upper Chest">Shoulders+Upper Chest</option>
+            <option value="Legs">Legs</option>
+            <option value="Rest">Rest</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn-secondary" id="saveOverride">Save</button>
+        <button class="btn-secondary" id="clearDay">Clear Entry</button>
+      </div>
+
+      <div class="stats" style="margin-top:14px">
+        <div class="stat">
+          <div class="small">Completed</div>
+          <strong id="countDone">0</strong>
+        </div>
+        <div class="stat">
+          <div class="small">Missed</div>
+          <strong id="countMissed">0</strong>
+        </div>
+        <div class="stat">
+          <div class="small">Tracked</div>
+          <strong id="countTotal">0</strong>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="small" style="color:var(--muted);margin-bottom:8px">Upcoming (next 14 days — workout days only)</div>
+        <div id="upcomingList" class="upcoming" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div class="card section">
+      <h3>Calendar</h3>
+      <div class="small" style="color:var(--muted)">Last 60 days. Click a day to edit it.</div>
+      <div style="margin-top:12px" class="heat-wrap" id="heatContainer"></div>
+    </div>
+
+    <div class="card section">
+      <h3>Points & Insights</h3>
+
+      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+        <div style="flex:1;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02);text-align:center">
+          <div class="small">Current Streak</div>
+          <strong id="currentStreak">0</strong>
+        </div>
+        <div style="flex:1;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02);text-align:center">
+          <div class="small">Best Streak</div>
+          <strong id="bestStreak">0</strong>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="points">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="small" style="color:var(--muted)">Points</div>
+            <div class="score" id="pointsTotal">0</div>
+          </div>
+          <div style="text-align:right;color:var(--muted)">
+            <div style="font-size:12px">+10 per completed • −15 per missed</div>
+            <div style="font-size:12px;margin-top:6px">Goal: keep points positive</div>
+          </div>
+        </div>
+
+        <div class="details" style="display:flex;gap:12px">
+          <div class="detail">
+            <div class="small">Completed Days</div>
+            <strong id="pointsDone">0</strong>
+          </div>
+          <div class="detail">
+            <div class="small">Missed Days</div>
+            <strong id="pointsMissed">0</strong>
+          </div>
+          <div class="detail">
+            <div class="small">Net Points</div>
+            <strong id="pointsNet">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="small">Monthly completion (last 12 months)</div>
+        <div class="month-list" id="monthList" style="margin-top:8px"></div>
+      </div>
+
+      <div style="margin-top:12px">
+        <h3 style="margin-top:12px">History</h3>
+        <div class="history" id="historyList"></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:var(--muted);font-size:13px">Tip: set the start date to the first workout day of your cycle to align expected types.</div>
+  </div>
+</div>
+
+<div id="heatTooltip" class="heat-tooltip" role="status" aria-hidden="true"></div>
+
+<script>
+/* ---------- Data model and constants ---------- */
+const STORAGE_KEY = 'workout-tracker-v1';
+const WORKOUT_TYPES = ["Chest+Triceps","Back+Biceps","Shoulders+Upper Chest","Legs"];
+const HEAT_DAYS = 60; // last 60 days
+const UPCOMING_DAYS = 14; // next 2 weeks
+const POINTS_PER_DONE = 10;
+const POINTS_PER_MISSED = -15;
+const CELL_SIZE = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--heat-size')) || 14;
+const CELL_GAP = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--heat-gap')) || 6;
+
+/* ---------- Helpers ---------- */
+function loadState(){ const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return { startDate:null, entries:{} }; try{return JSON.parse(raw);}catch(e){return { startDate:null, entries:{} };}}
+function saveState(s){ localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+function toISO(d){ return d.toISOString().slice(0,10); }
+function parseISO(s){ const d = new Date(s + 'T00:00:00'); return isNaN(d) ? null : d; }
+function daysBetween(a,b){ const ms = 24*60*60*1000; return Math.floor((b - a) / ms); }
+function addDays(d,n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+function formatDateISO(iso){ const d = parseISO(iso); if(!d) return iso; return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
+
+function expectedFor(dateISO, startISO){
+  const date = parseISO(dateISO);
+  const start = parseISO(startISO);
+  if(!date || !start) return { isWorkout:false, type:null };
+  const diff = daysBetween(start, date);
+  if(diff < 0) return { isWorkout:false, type:null };
+  if(diff % 2 === 1) return { isWorkout:false, type:"Rest" };
+  const workoutIndex = ((diff/2) % 4 + 4) % 4;
+  return { isWorkout:true, type: WORKOUT_TYPES[workoutIndex] };
+}
+
+/* ---------- UI elements ---------- */
+const state = loadState();
+const startDateEl = document.getElementById('startDate');
+const viewDateEl = document.getElementById('viewDate');
+const todayLabel = document.getElementById('todayLabel');
+const todaySub = document.getElementById('todaySub');
+const workoutTypeEl = document.getElementById('workoutType');
+const workoutNote = document.getElementById('workoutNote');
+const statusPill = document.getElementById('statusPill');
+const markDoneBtn = document.getElementById('markDone');
+const markMissedBtn = document.getElementById('markMissed');
+const overrideTypeEl = document.getElementById('overrideType');
+const saveOverrideBtn = document.getElementById('saveOverride');
+const clearDayBtn = document.getElementById('clearDay');
+const countDoneEl = document.getElementById('countDone');
+const countMissedEl = document.getElementById('countMissed');
+const countTotalEl = document.getElementById('countTotal');
+const historyList = document.getElementById('historyList');
+const heatContainer = document.getElementById('heatContainer');
+const heatTooltip = document.getElementById('heatTooltip');
+const currentStreakEl = document.getElementById('currentStreak');
+const bestStreakEl = document.getElementById('bestStreak');
+const monthListEl = document.getElementById('monthList');
+const upcomingList = document.getElementById('upcomingList');
+const pointsTotalEl = document.getElementById('pointsTotal');
+const pointsDoneEl = document.getElementById('pointsDone');
+const pointsMissedEl = document.getElementById('pointsMissed');
+const pointsNetEl = document.getElementById('pointsNet');
+
+/* ---------- Initialization ---------- */
+function init(){
+  const todayISO = toISO(new Date());
+  if(!state.startDate) state.startDate = todayISO;
+  startDateEl.value = state.startDate;
+  viewDateEl.value = todayISO;
+  todayLabel.textContent = formatDateISO(todayISO);
+  todaySub.textContent = 'Today';
+  renderForDate(viewDateEl.value);
+  renderStats();
+  renderHistory();
+  computeStreaksAndMonthly();
+  renderHeatmap();
+  renderUpcomingSchedule();
+  renderPoints();
+}
+init();
+
+/* ---------- Render functions ---------- */
+function renderForDate(dateISO){
+  const exp = expectedFor(dateISO, state.startDate);
+  const entry = state.entries && state.entries[dateISO];
+  const typeText = entry && entry.type ? entry.type : (exp.isWorkout ? exp.type : 'Rest');
+  workoutTypeEl.textContent = typeText || '—';
+  workoutNote.textContent = entry ? (entry.status === 'done' ? 'Completed' : (entry.status === 'missed' ? 'Missed' : 'Recorded')) : (exp.isWorkout ? 'Planned — mark when done' : 'Rest day');
+
+  if(entry && entry.status === 'done'){
+    statusPill.textContent = 'COMPLETED';
+    statusPill.style.background = 'linear-gradient(90deg,var(--accent),var(--accent-2))';
+    statusPill.style.color = '#2b2200';
+  } else if(entry && entry.status === 'missed'){
+    statusPill.textContent = 'MISSED';
+    statusPill.style.background = 'linear-gradient(90deg,var(--danger),#ff7b7b)';
+    statusPill.style.color = '#fff';
+  } else {
+    statusPill.textContent = exp.isWorkout ? 'PLANNED' : 'REST';
+    statusPill.style.background = 'transparent';
+    statusPill.style.color = 'var(--muted)';
+  }
+
+  overrideTypeEl.value = (state.entries && state.entries[dateISO] && state.entries[dateISO].type) || '';
+
+  if(entry){
+    markDoneBtn.disabled = entry.status === 'done';
+    markMissedBtn.disabled = entry.status === 'missed';
+  } else {
+    markDoneBtn.disabled = false;
+    markMissedBtn.disabled = false;
+  }
+}
+
+function renderStats(){
+  const entries = state.entries || {};
+  let done=0, missed=0, total=0;
+  for(const d in entries){
+    total++;
+    if(entries[d].status === 'done') done++;
+    if(entries[d].status === 'missed') missed++;
+  }
+  countDoneEl.textContent = done;
+  countMissedEl.textContent = missed;
+  countTotalEl.textContent = total;
+}
+
+function renderHistory(){
+  historyList.innerHTML = '';
+  const entries = state.entries || {};
+  const keys = Object.keys(entries).sort((a,b)=> b.localeCompare(a));
+  if(keys.length === 0){ historyList.innerHTML = '<div style="color:var(--muted)">No entries yet.</div>'; return; }
+  for(const k of keys){
+    const e = entries[k];
+    const el = document.createElement('div');
+    el.className = 'entry';
+    el.innerHTML = `<div class="left"><div style="font-weight:700">${k}</div><div style="color:var(--muted)">${e.type||'—'}</div></div><div style="text-align:right"><div style="margin-bottom:6px"><span class="tag">${e.status==='done'?'Done':'Missed'}</span></div><div style="color:var(--muted);font-size:12px">${e.updatedAt?new Date(e.updatedAt).toLocaleString():''}</div></div>`;
+    historyList.appendChild(el);
+  }
+}
+
+/* ---------- Actions ---------- */
+startDateEl.addEventListener('change', ()=>{
+  state.startDate = startDateEl.value;
+  saveState(state);
+  renderForDate(viewDateEl.value);
+  renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints();
+});
+viewDateEl.addEventListener('change', ()=> { renderForDate(viewDateEl.value); renderUpcomingSchedule(); });
+
+markDoneBtn.addEventListener('click', ()=>{
+  const d = viewDateEl.value;
+  state.entries = state.entries || {};
+  const currentType = overrideTypeEl.value || expectedFor(d, state.startDate).type || 'Rest';
+  state.entries[d] = { status:'done', type: currentType, updatedAt: new Date().toISOString() };
+  saveState(state);
+  renderForDate(d); renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints();
+});
+
+markMissedBtn.addEventListener('click', ()=>{
+  const d = viewDateEl.value;
+  state.entries = state.entries || {};
+  const currentType = overrideTypeEl.value || expectedFor(d, state.startDate).type || 'Rest';
+  state.entries[d] = { status:'missed', type: currentType, updatedAt: new Date().toISOString() };
+  saveState(state);
+  renderForDate(d); renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints();
+});
+
+saveOverrideBtn.addEventListener('click', ()=>{
+  const d = viewDateEl.value; const chosen = overrideTypeEl.value;
+  state.entries = state.entries || {};
+  if(!chosen){ if(state.entries[d]){ delete state.entries[d].type; saveState(state); } }
+  else { state.entries[d] = state.entries[d] || { status:null }; state.entries[d].type = chosen; state.entries[d].updatedAt = new Date().toISOString(); saveState(state); }
+  renderForDate(d); renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints();
+});
+
+clearDayBtn.addEventListener('click', ()=>{
+  const d = viewDateEl.value; if(state.entries && state.entries[d]){ delete state.entries[d]; saveState(state); }
+  renderForDate(d); renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints();
+});
+
+/* ---------- Upcoming schedule (next 14 days, skip rest days) ---------- */
+function renderUpcomingSchedule(){
+  upcomingList.innerHTML = '';
+  const today = parseISO(viewDateEl.value || toISO(new Date()));
+  if(!today) return;
+  const items = [];
+  for(let i=1;i<=UPCOMING_DAYS;i++){
+    const d = addDays(today, i);
+    const iso = toISO(d);
+    const exp = expectedFor(iso, state.startDate);
+    if(exp.isWorkout){
+      items.push({ date: iso, type: exp.type });
+    }
+  }
+  if(items.length === 0){
+    upcomingList.innerHTML = '<div style="color:var(--muted)">No scheduled workouts in the next 2 weeks.</div>';
+    return;
+  }
+  for(const it of items){
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<div style="display:flex;align-items:center;gap:12px"><div><div class="date">${formatDateISO(it.date)}</div><div class="type">${it.type}</div></div></div><div style="min-width:36px"></div>`;
+    row.addEventListener('click', ()=>{
+      viewDateEl.value = it.date;
+      renderForDate(it.date);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    upcomingList.appendChild(row);
+  }
+}
+
+/* ---------- Points calculation & render ---------- */
+function renderPoints(){
+  const entries = state.entries || {};
+  let done = 0, missed = 0;
+  for(const d in entries){
+    if(entries[d].status === 'done') done++;
+    if(entries[d].status === 'missed') missed++;
+  }
+  const pointsFromDone = done * POINTS_PER_DONE;
+  const pointsFromMissed = missed * POINTS_PER_MISSED;
+  const total = pointsFromDone + pointsFromMissed;
+  pointsTotalEl.textContent = total;
+  pointsDoneEl.textContent = done;
+  pointsMissedEl.textContent = missed;
+  pointsNetEl.textContent = total;
+}
+
+/* ---------- Streaks & Monthly ---------- */
+function computeStreaksAndMonthly(){
+  const entries = state.entries || {};
+  const today = new Date();
+  const startRange = addDays(today, - (HEAT_DAYS - 1));
+  const dates = [];
+  for(let i=0;i<HEAT_DAYS;i++){ dates.push(toISO(addDays(startRange,i))); }
+
+  // Current streak
+  let currentStreak = 0;
+  for(let i = dates.length - 1; i >= 0; i--){
+    const iso = dates[i];
+    const exp = expectedFor(iso, state.startDate);
+    if(!exp.isWorkout) continue;
+    const e = entries[iso];
+    if(e && e.status === 'done') currentStreak++;
+    else break;
+  }
+
+  // Best streak
+  let bestStreak = 0;
+  let running = 0;
+  let bestRanges = [];
+  let tempStart = null;
+  for(let i=0;i<dates.length;i++){
+    const iso = dates[i];
+    const exp = expectedFor(iso, state.startDate);
+    if(!exp.isWorkout) continue;
+    const e = entries[iso];
+    if(e && e.status === 'done'){
+      if(running === 0) tempStart = iso;
+      running++;
+    } else {
+      if(running > 0){
+        if(running > bestStreak){ bestStreak = running; bestRanges = [{start: tempStart, end: dates[i-1]}]; }
+        else if(running === bestStreak && running > 0){ bestRanges.push({start: tempStart, end: dates[i-1]}); }
+      }
+      running = 0;
+      tempStart = null;
+    }
+  }
+  if(running > 0){
+    if(running > bestStreak){ bestStreak = running; bestRanges = [{start: tempStart, end: dates[dates.length-1]}]; }
+    else if(running === bestStreak && running > 0){ bestRanges.push({start: tempStart, end: dates[dates.length-1]}); }
+  }
+
+  state._bestStreakRanges = bestRanges;
+  saveState(state);
+
+  currentStreakEl.textContent = currentStreak;
+  bestStreakEl.textContent = bestStreak;
+
+  // Monthly summary
+  const monthly = {};
+  const monthsToShow = 12;
+  const monthStart = new Date(today.getFullYear(), today.getMonth() - (monthsToShow - 1), 1);
+  for(let d = new Date(monthStart); d <= today; d = addDays(d,1)){
+    const iso = toISO(d);
+    const key = iso.slice(0,7);
+    if(!monthly[key]) monthly[key] = { scheduled:0, done:0 };
+    const exp = expectedFor(iso, state.startDate);
+    if(exp.isWorkout){
+      monthly[key].scheduled++;
+      const e = entries[iso];
+      if(e && e.status === 'done') monthly[key].done++;
+    }
+  }
+  monthListEl.innerHTML = '';
+  const monthKeys = Object.keys(monthly).sort();
+  for(const k of monthKeys){
+    const m = monthly[k];
+    const pct = m.scheduled === 0 ? 0 : Math.round((m.done / m.scheduled) * 100);
+    const label = new Date(k + '-01').toLocaleDateString(undefined,{month:'short',year:'numeric'});
+    const item = document.createElement('div');
+    item.className = 'month-item';
+    item.innerHTML = `<div style="font-weight:700">${label}</div><div class="small">${m.done}/${m.scheduled} workouts</div><div class="bar"><i style="width:${pct}%;"></i></div>`;
+    monthListEl.appendChild(item);
+  }
+}
+
+/* ---------- Heatmap rendering (60 days) ---------- */
+function getHeatColorForDate(iso){
+  const entries = state.entries || {};
+  const e = entries[iso];
+  if(e){
+    if(e.status === 'done') return getComputedStyle(document.documentElement).getPropertyValue('--success').trim();
+    if(e.status === 'missed') return getComputedStyle(document.documentElement).getPropertyValue('--danger').trim();
+    if(e.type === 'Rest') return getComputedStyle(document.documentElement).getPropertyValue('--rest').trim();
+  }
+  const exp = expectedFor(iso, state.startDate);
+  if(exp && exp.type === 'Rest') return getComputedStyle(document.documentElement).getPropertyValue('--rest').trim();
+  return 'rgba(255,255,255,0.03)';
+}
+function isDateInBestRanges(iso){
+  const ranges = state._bestStreakRanges || [];
+  for(const r of ranges){ if(r.start <= iso && iso <= r.end) return true; }
+  return false;
+}
+
+function renderHeatmap(){
+  heatContainer.innerHTML = '';
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS,'svg');
+  svg.setAttribute('class','heat-svg');
+
+  const today = new Date();
+  const startDate = addDays(today, - (HEAT_DAYS - 1));
+  const startDay = startDate.getDay();
+  const alignedStart = addDays(startDate, -startDay);
+  const totalDays = daysBetween(alignedStart, addDays(today,1));
+  const weeks = Math.ceil(totalDays / 7);
+  const width = weeks * (CELL_SIZE + CELL_GAP);
+  const height = 7 * (CELL_SIZE + CELL_GAP);
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.style.maxWidth = '100%';
+
+  for(let w=0; w<weeks; w++){
+    for(let dow=0; dow<7; dow++){
+      const dayIndex = w*7 + dow;
+      const dateObj = addDays(alignedStart, dayIndex);
+      const iso = toISO(dateObj);
+      const withinRange = daysBetween(addDays(today, - (HEAT_DAYS - 1)), dateObj) >= 0 && daysBetween(dateObj, addDays(today,1)) >= 0;
+      const x = w * (CELL_SIZE + CELL_GAP);
+      const y = dow * (CELL_SIZE + CELL_GAP);
+      const rect = document.createElementNS(svgNS,'rect');
+      rect.setAttribute('x', x);
+      rect.setAttribute('y', y);
+      rect.setAttribute('width', CELL_SIZE);
+      rect.setAttribute('height', CELL_SIZE);
+      rect.setAttribute('rx', 4);
+      rect.setAttribute('ry', 4);
+      rect.setAttribute('data-date', iso);
+      rect.style.cursor = withinRange ? 'pointer' : 'default';
+      if(!withinRange){
+        rect.setAttribute('fill', 'transparent');
+        rect.setAttribute('opacity', '0.03');
+      } else {
+        rect.setAttribute('fill', getHeatColorForDate(iso));
+        rect.setAttribute('stroke', 'rgba(255,255,255,0.03)');
+        rect.setAttribute('stroke-width', '1');
+      }
+      if(iso === toISO(new Date())){
+        rect.setAttribute('stroke','#ffd400');
+        rect.setAttribute('stroke-width','2');
+      }
+      if(withinRange && isDateInBestRanges(iso)){
+        rect.setAttribute('stroke','#ffcf33');
+        rect.setAttribute('stroke-width','2');
+      }
+      rect.addEventListener('mouseenter', (ev)=>{
+        const d = ev.target.getAttribute('data-date');
+        const entries = state.entries || {};
+        const e = entries[d];
+        const status = e ? (e.status === 'done' ? 'Done' : (e.status === 'missed' ? 'Missed' : 'Recorded')) : (expectedFor(d, state.startDate).type === 'Rest' ? 'Rest' : 'No entry');
+        const type = e && e.type ? e.type : expectedFor(d, state.startDate).type || '—';
+        heatTooltip.style.display = 'block';
+        heatTooltip.innerHTML = `<strong style="color:#fff">${formatDateISO(d)}</strong><div style="margin-top:6px;color:var(--muted)">${status} • ${type}</div>`;
+      });
+      rect.addEventListener('mousemove', (ev)=>{
+        heatTooltip.style.left = (ev.pageX + 12) + 'px';
+        heatTooltip.style.top = (ev.pageY + 12) + 'px';
+      });
+      rect.addEventListener('mouseleave', ()=>{ heatTooltip.style.display = 'none'; });
+      rect.addEventListener('click', ()=>{
+        const d = rect.getAttribute('data-date');
+        viewDateEl.value = d;
+        renderForDate(d);
+        renderUpcomingSchedule();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      svg.appendChild(rect);
+    }
+  }
+  heatContainer.appendChild(svg);
+}
+
+/* ---------- Buttons ---------- */
+document.getElementById('heatExport')?.addEventListener('click', ()=>{ /* optional export kept out of scope */ });
+document.getElementById('heatRefresh')?.addEventListener('click', ()=>{ computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints(); });
+
+/* ---------- Resize ---------- */
+window.addEventListener('resize', ()=> renderHeatmap());
+</script>
+</body>
+</html>
