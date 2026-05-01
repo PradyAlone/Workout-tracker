@@ -19,7 +19,6 @@
     --glass-blur: 10px;
     --shadow-soft: 0 12px 30px rgba(12,18,28,0.06);
     --shadow-strong: 0 26px 60px rgba(12,18,28,0.10);
-    /* Neutral elevated shadow for today's card (removed yellow tint) */
     --today-shadow: 0 40px 140px rgba(0,0,0,0.12), 0 18px 60px rgba(0,0,0,0.08);
     --max-width: 980px;
     --gap: 20px;
@@ -30,7 +29,6 @@
     --google-elevation: 0 8px 22px rgba(26,115,232,0.14);
   }
 
-  /* Page background: single color */
   html,body{
     height:100%;
     margin:0;
@@ -46,31 +44,22 @@
   header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
   .logo{width:68px;height:68px;border-radius:14px;background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-strong);font-weight:800;color:var(--google-orange);font-size:22px;letter-spacing:1px}
   h1{font-size:20px;margin:0}
-  .sub{color:var(--muted);font-size:13px;margin-top:4px;max-width:640px}
   .stack{display:flex;flex-direction:column;gap:var(--gap)}
   @media(max-width:720px){ .wrap{padding:18px} }
 
-  /*
-    Glassy grey card style:
-    - translucent grey background
-    - subtle border with soft white highlight
-    - stronger backdrop-filter for the glass effect
-    - slightly desaturated look so cards read as "glassy grey" over the light-blue page
-  */
   .card{
-    background: rgba(230,234,238,0.62);               /* translucent grey */
+    background: rgba(230,234,238,0.62);
     border-radius:var(--card-radius);
     padding:18px;
     box-shadow:var(--shadow-soft);
     backdrop-filter: blur(var(--glass-blur)) saturate(120%);
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(120%);
-    border: 1px solid rgba(255,255,255,0.55);         /* soft highlight edge */
+    border: 1px solid rgba(255,255,255,0.55);
     position:relative;
     overflow:visible;
     transition: transform 180ms var(--ui-ease), box-shadow 180ms var(--ui-ease), background 180ms var(--ui-ease);
     color: #05202b;
   }
-  /* subtle glossy sheen at top */
   .card::after{
     content:"";
     position:absolute;left:0;right:0;top:0;height:34%;
@@ -80,13 +69,12 @@
   }
   .card:hover{ transform: translateY(-6px); box-shadow:var(--shadow-strong); }
 
-  /* Today's card — elevated and visually prominent (neutral shadow, no yellow tint) */
   .today-card{
     z-index: 6;
     transform: translateY(-4px);
     box-shadow: var(--today-shadow);
-    border: 1px solid rgba(0,0,0,0.06); /* neutral subtle border */
-    background: rgba(230,234,238,0.78); /* slightly less transparent to stand out */
+    border: 1px solid rgba(0,0,0,0.06);
+    background: rgba(230,234,238,0.78);
   }
   .today-card::after{ height:38%; background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.12)); }
   .today-card:hover{
@@ -110,7 +98,6 @@
   .workout-type{font-size:34px;font-weight:900;color:var(--google-orange);letter-spacing:0.4px;margin-bottom:6px}
   .workout-sub{color:var(--muted);font-size:13px}
 
-  /* Unified button base */
   .btn {
     -webkit-appearance: none;
     appearance: none;
@@ -188,7 +175,6 @@
     <div class="logo">WT</div>
     <div style="flex:1;min-width:0">
       <h1>Workout Tracker</h1>
-      <div class="sub">Glassy grey translucent cards — today's card emphasized with a neutral drop shadow (no yellow tint).</div>
     </div>
     <div style="text-align:right">
       <div style="font-weight:700;color:var(--muted);font-size:13px">Chest • Back • Shoulders • Legs</div>
@@ -196,12 +182,10 @@
   </header>
 
   <div class="stack">
-    <!-- Main card (today) — extra class today-card -->
     <div class="card main today-card" id="mainCard">
       <div class="today-row">
         <div class="today-left">
           <div class="today-date" id="todayLabel">Loading…</div>
-          <div class="today-sub" id="todaySub">—</div>
         </div>
 
         <div style="flex:1">
@@ -224,7 +208,6 @@
         </div>
       </div>
 
-      <!-- Controls -->
       <div style="margin-top:12px" class="controls">
         <div>
           <label for="startDate">Start Date</label>
@@ -273,14 +256,12 @@
       </div>
     </div>
 
-    <!-- Calendar (60 days) -->
     <div class="card section">
       <h3 style="margin:0 0 8px 0">Calendar</h3>
       <div class="small" style="color:var(--muted)">Last 60 days. Click a day to edit it.</div>
       <div style="margin-top:12px" class="heat-wrap" id="heatContainer"></div>
     </div>
 
-    <!-- Points & Insights -->
     <div class="card section">
       <h3 style="margin:0 0 8px 0">Points & Insights</h3>
 
@@ -341,7 +322,6 @@
 <div id="heatTooltip" class="heat-tooltip" role="status" aria-hidden="true"></div>
 
 <script>
-/* ---------- Full client-side app logic: state, rendering, interactions ---------- */
 const STORAGE_KEY = 'workout-tracker-v1';
 const WORKOUT_TYPES = ["Chest+Triceps","Back+Biceps","Shoulders+Upper Chest","Legs"];
 const HEAT_DAYS = 60;
@@ -351,7 +331,6 @@ const POINTS_PER_MISSED = -15;
 const CELL_SIZE = 14;
 const CELL_GAP = 6;
 
-/* Helpers */
 function loadState(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -368,7 +347,6 @@ function addDays(d,n){ const x = new Date(d); x.setDate(x.getDate()+n); return x
 function daysBetween(a,b){ const ms = 24*60*60*1000; return Math.floor((b - a) / ms); }
 function formatDateISO(iso){ const d = parseISO(iso); if(!d) return iso; return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
 
-/* Expected workout logic (2-on, 1-rest pattern) */
 function expectedFor(dateISO, startISO){
   const date = parseISO(dateISO);
   const start = parseISO(startISO);
@@ -380,12 +358,10 @@ function expectedFor(dateISO, startISO){
   return { isWorkout:true, type: WORKOUT_TYPES[workoutIndex] };
 }
 
-/* UI elements */
 const state = loadState();
 const startDateEl = document.getElementById('startDate');
 const viewDateEl = document.getElementById('viewDate');
 const todayLabel = document.getElementById('todayLabel');
-const todaySub = document.getElementById('todaySub');
 const workoutTypeEl = document.getElementById('workoutType');
 const workoutNote = document.getElementById('workoutNote');
 const statusPill = document.getElementById('statusPill');
@@ -409,14 +385,12 @@ const pointsDoneEl = document.getElementById('pointsDone');
 const pointsMissedEl = document.getElementById('pointsMissed');
 const pointsNetEl = document.getElementById('pointsNet');
 
-/* Init */
 function init(){
   const todayISO = toISO(new Date());
   if(!state.startDate) state.startDate = todayISO;
   startDateEl.value = state.startDate;
   viewDateEl.value = todayISO;
   todayLabel.textContent = formatDateISO(todayISO);
-  todaySub.textContent = 'Today';
   renderForDate(viewDateEl.value);
   renderStats();
   renderHistory();
@@ -427,7 +401,6 @@ function init(){
 }
 init();
 
-/* Render selected date */
 function renderForDate(dateISO){
   const exp = expectedFor(dateISO, state.startDate);
   const entry = state.entries && state.entries[dateISO];
@@ -460,7 +433,6 @@ function renderForDate(dateISO){
   }
 }
 
-/* Stats & history */
 function renderStats(){
   const entries = state.entries || {};
   let done=0, missed=0, total=0;
@@ -487,7 +459,6 @@ function renderHistory(){
   }
 }
 
-/* Actions */
 startDateEl.addEventListener('change', ()=>{
   state.startDate = startDateEl.value;
   saveState(state);
@@ -496,7 +467,6 @@ startDateEl.addEventListener('change', ()=>{
 });
 viewDateEl.addEventListener('change', ()=> { renderForDate(viewDateEl.value); renderUpcomingSchedule(); });
 
-/* Ripple helper for buttons */
 function attachRipple(btn){
   btn.addEventListener('click', function(e){
     const rect = btn.getBoundingClientRect();
@@ -543,7 +513,6 @@ clearDayBtn.addEventListener('click', ()=>{
   renderForDate(d); renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints();
 });
 
-/* Upcoming schedule (next 14 days, skip rest days) */
 function renderUpcomingSchedule(){
   upcomingList.innerHTML = '';
   const today = parseISO(viewDateEl.value || toISO(new Date()));
@@ -574,7 +543,6 @@ function renderUpcomingSchedule(){
   }
 }
 
-/* Points calculation & render */
 function renderPoints(){
   const entries = state.entries || {};
   let done = 0, missed = 0;
@@ -591,7 +559,6 @@ function renderPoints(){
   pointsNetEl.textContent = total;
 }
 
-/* Streaks & monthly */
 function computeStreaksAndMonthly(){
   const entries = state.entries || {};
   const today = new Date();
@@ -599,7 +566,6 @@ function computeStreaksAndMonthly(){
   const dates = [];
   for(let i=0;i<HEAT_DAYS;i++){ dates.push(toISO(addDays(startRange,i))); }
 
-  // Current streak
   let currentStreak = 0;
   for(let i = dates.length - 1; i >= 0; i--){
     const iso = dates[i];
@@ -610,7 +576,6 @@ function computeStreaksAndMonthly(){
     else break;
   }
 
-  // Best streak
   let bestStreak = 0;
   let running = 0;
   let bestRanges = [];
@@ -643,7 +608,6 @@ function computeStreaksAndMonthly(){
   currentStreakEl.textContent = currentStreak;
   bestStreakEl.textContent = bestStreak;
 
-  // Monthly summary
   const monthly = {};
   const monthsToShow = 12;
   const monthStart = new Date(today.getFullYear(), today.getMonth() - (monthsToShow - 1), 1);
@@ -671,7 +635,6 @@ function computeStreaksAndMonthly(){
   }
 }
 
-/* Heatmap rendering (60 days) */
 function getHeatColorForDate(iso){
   const entries = state.entries || {};
   const e = entries[iso];
@@ -734,7 +697,7 @@ function renderHeatmap(){
         rect.setAttribute('stroke-width', '1');
       }
       if(iso === toISO(new Date())){
-        rect.setAttribute('stroke','#34a853'); /* neutral highlight for today */
+        rect.setAttribute('stroke','#34a853');
         rect.setAttribute('stroke-width','2');
       }
       if(withinRange && isDateInBestRanges(iso)){
@@ -768,7 +731,6 @@ function renderHeatmap(){
   heatContainer.appendChild(svg);
 }
 
-/* Expose a small API for debugging */
 window.__workoutTracker = { state, save: ()=> saveState(state), renderAll: ()=> { renderForDate(viewDateEl.value); renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints(); } };
 </script>
 </body>
