@@ -3,127 +3,182 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Workout Tracker</title>
+<title>Workout Tracker — Glassy Grey Cards (No Yellow Tint)</title>
 <style>
   :root{
-    /* Dark grey gradient backdrop and luxurious glass palette */
-    --bg-1: #2b2b2f;
-    --bg-2: #1f1f23;
-    --glass-1: rgba(255,255,255,0.03);
-    --glass-2: rgba(255,255,255,0.015);
-    --muted: #9aa4b2;
-    --accent: #ffd400;
-    --accent-2: #ffcf33;
-    --accent-dark: #2b2200;
-    --success: #2ecc71;
-    --danger: #ff4d4f;
-    --rest: #6b7280;
-    --card-radius: 18px;
-    --glass-blur: 18px;
-    --shadow: 0 40px 100px rgba(0,0,0,0.7);
-    --heat-size: 14px;
-    --heat-gap: 6px;
+    --bg: #e6f7ff;
+    --muted: #4b5b66;
+    --google-orange: #f29900;
+    --google-green: #34a853;
+    --google-red: #ea4335;
+    --ios-secondary: #f2f4f7;
+    --success: var(--google-green);
+    --danger: var(--google-red);
+    --rest: #9aa4b2;
+    --card-radius: 16px;
+    --glass-blur: 10px;
+    --shadow-soft: 0 12px 30px rgba(12,18,28,0.06);
+    --shadow-strong: 0 26px 60px rgba(12,18,28,0.10);
+    /* Neutral elevated shadow for today's card (removed yellow tint) */
+    --today-shadow: 0 40px 140px rgba(0,0,0,0.12), 0 18px 60px rgba(0,0,0,0.08);
     --max-width: 980px;
     --gap: 20px;
+    --heat-size: 14px;
+    --heat-gap: 6px;
     --ui-ease: cubic-bezier(.2,.9,.2,1);
+    --focus-ring: rgba(51,122,255,0.14);
+    --google-elevation: 0 8px 22px rgba(26,115,232,0.14);
   }
 
-  /* Base */
+  /* Page background: single color */
   html,body{
     height:100%;
     margin:0;
-    background:
-      radial-gradient(900px 420px at 8% 8%, rgba(0,0,0,0.12), transparent),
-      linear-gradient(180deg,var(--bg-2) 0%, var(--bg-1) 100%);
-    color:#e9eef3;
-    font-family:-apple-system,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background-color: var(--bg);
+    font-family: -apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
+    color:#05202b;
+    scroll-behavior: smooth;
   }
-  .wrap{max-width:var(--max-width);margin:28px auto;padding:22px;box-sizing:border-box}
 
-  header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-  .logo{
-    width:68px;height:68px;border-radius:14px;
-    background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);
-    font-weight:800;color:var(--accent);font-size:22px;letter-spacing:1px;
-  }
+  .wrap{max-width:var(--max-width);margin:28px auto;padding:28px;box-sizing:border-box}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+  .logo{width:68px;height:68px;border-radius:14px;background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-strong);font-weight:800;color:var(--google-orange);font-size:22px;letter-spacing:1px}
   h1{font-size:20px;margin:0}
   .sub{color:var(--muted);font-size:13px;margin-top:4px;max-width:640px}
-
   .stack{display:flex;flex-direction:column;gap:var(--gap)}
-  @media(max-width:720px){ .wrap{padding:16px} }
+  @media(max-width:720px){ .wrap{padding:18px} }
 
-  /* Ultra-glassy dark cards */
+  /*
+    Glassy grey card style:
+    - translucent grey background
+    - subtle border with soft white highlight
+    - stronger backdrop-filter for the glass effect
+    - slightly desaturated look so cards read as "glassy grey" over the light-blue page
+  */
   .card{
-    background: linear-gradient(180deg,var(--glass-1),var(--glass-2));
-    border-radius:var(--card-radius);padding:18px;box-shadow:var(--shadow);
-    backdrop-filter: blur(var(--glass-blur));border:1px solid rgba(255,255,255,0.03);
+    background: rgba(230,234,238,0.62);               /* translucent grey */
+    border-radius:var(--card-radius);
+    padding:18px;
+    box-shadow:var(--shadow-soft);
+    backdrop-filter: blur(var(--glass-blur)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(120%);
+    border: 1px solid rgba(255,255,255,0.55);         /* soft highlight edge */
+    position:relative;
+    overflow:visible;
+    transition: transform 180ms var(--ui-ease), box-shadow 180ms var(--ui-ease), background 180ms var(--ui-ease);
+    color: #05202b;
+  }
+  /* subtle glossy sheen at top */
+  .card::after{
+    content:"";
+    position:absolute;left:0;right:0;top:0;height:34%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.12));
+    border-top-left-radius:var(--card-radius);border-top-right-radius:var(--card-radius);
+    pointer-events:none;mix-blend-mode:overlay;
+  }
+  .card:hover{ transform: translateY(-6px); box-shadow:var(--shadow-strong); }
+
+  /* Today's card — elevated and visually prominent (neutral shadow, no yellow tint) */
+  .today-card{
+    z-index: 6;
+    transform: translateY(-4px);
+    box-shadow: var(--today-shadow);
+    border: 1px solid rgba(0,0,0,0.06); /* neutral subtle border */
+    background: rgba(230,234,238,0.78); /* slightly less transparent to stand out */
+  }
+  .today-card::after{ height:38%; background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.12)); }
+  .today-card:hover{
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 56px 180px rgba(0,0,0,0.14), 0 28px 80px rgba(0,0,0,0.08);
   }
 
   .main{display:flex;flex-direction:column;gap:18px;align-items:stretch}
   .today-row{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
   .today-left{min-width:220px;flex:1}
-  .today-date{font-size:20px;font-weight:800;letter-spacing:0.2px;color:#fff}
+  .today-date{font-size:20px;font-weight:800;letter-spacing:0.2px;color:#05202b}
   .today-sub{color:var(--muted);font-size:13px;margin-top:6px}
 
   .today-panel{
-    display:flex;align-items:center;justify-content:space-between;gap:18px;padding:28px;border-radius:16px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.03);
+    display:flex;align-items:center;justify-content:space-between;gap:18px;padding:26px;border-radius:16px;
+    background: rgba(255,255,255,0.85);
+    border:1px solid rgba(10,20,30,0.04);
+    box-shadow: 0 10px 30px rgba(10,20,30,0.04);
   }
 
-  .workout-type{font-size:36px;font-weight:900;color:var(--accent);letter-spacing:0.6px;margin-bottom:6px;text-transform:none;text-shadow: 0 10px 30px rgba(255,212,0,0.06);}
+  .workout-type{font-size:34px;font-weight:900;color:var(--google-orange);letter-spacing:0.4px;margin-bottom:6px}
   .workout-sub{color:var(--muted);font-size:13px}
 
-  .action-area{display:flex;gap:12px;align-items:center}
-  .btn-primary{
-    background: linear-gradient(180deg,var(--accent),var(--accent-2));
-    color:var(--accent-dark); border:0;padding:18px 30px;border-radius:16px;font-weight:900;cursor:pointer;font-size:16px;
-    box-shadow: 0 26px 80px rgba(255,212,0,0.14), inset 0 -4px 12px rgba(0,0,0,0.12);
-    transition: transform .12s var(--ui-ease), box-shadow .18s var(--ui-ease);
+  /* Unified button base */
+  .btn {
+    -webkit-appearance: none;
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1;
+    padding: 10px 16px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 120ms var(--ui-ease), box-shadow 160ms var(--ui-ease), background 160ms var(--ui-ease), opacity 120ms var(--ui-ease);
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+    overflow: hidden;
   }
-  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 36px 110px rgba(255,212,0,0.18) }
-  .btn-secondary{ background:transparent;border:1px solid rgba(255,255,255,0.04);padding:12px 14px;border-radius:12px;color:var(--muted);cursor:pointer;transition:transform .12s var(--ui-ease); }
-  .btn-secondary:hover{ transform:translateY(-1px) }
+
+  .btn-success { background: linear-gradient(180deg, var(--google-green), #2f9e4a); color: #fff; padding: 10px 18px; border-radius: 12px; box-shadow: 0 8px 22px rgba(52,168,83,0.12); }
+  .btn-danger  { background: linear-gradient(180deg, var(--google-red), #d93a2a); color: #fff; padding: 10px 18px; border-radius: 12px; box-shadow: 0 8px 22px rgba(234,67,53,0.12); }
+  .btn-accent  { background: linear-gradient(180deg, var(--google-orange), #d07a00); color: #fff; padding: 10px 18px; border-radius: 12px; box-shadow: 0 8px 22px rgba(242,153,0,0.12); }
+  .btn-secondary { background: linear-gradient(180deg, var(--ios-secondary), #ffffff); color: var(--muted); border: 1px solid rgba(10,20,30,0.04); padding: 9px 14px; border-radius: 12px; box-shadow: 0 6px 18px rgba(12,18,28,0.04); }
+  .btn-ghost { background: transparent; color: var(--google-orange); padding: 8px 12px; border-radius: 10px; }
+
+  .ripple { position: absolute; border-radius: 50%; transform: scale(0); background: rgba(255,255,255,0.45); animation: ripple 600ms linear; pointer-events: none; }
+  @keyframes ripple { to { transform: scale(6); opacity: 0; } }
 
   .controls{display:flex;gap:12px;flex-wrap:wrap}
   .controls > div{min-width:160px;flex:1}
   label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-  input[type="date"], select{ width:100%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03); background:transparent;color:#fff;font-size:14px;outline:none; }
+  input[type="date"], select{
+    width:100%;padding:10px;border-radius:12px;border:1px solid rgba(10,20,30,0.04);
+    background: rgba(255,255,255,0.9); color:#05202b;font-size:14px;outline:none;
+  }
 
   .stats{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  .stat{flex:1;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));text-align:center;border:1px solid rgba(255,255,255,0.02)}
-  .stat strong{display:block;font-size:18px;color:#fff}
+  .stat{flex:1;padding:12px;border-radius:12px;background: rgba(255,255,255,0.9);text-align:center;border:1px solid rgba(10,20,30,0.04)}
+  .stat strong{display:block;font-size:18px;color:#05202b}
   .small{font-size:12px;color:var(--muted)}
 
-  .upcoming{ display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02); }
-  .upcoming .row{ display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;cursor:pointer;transition:background .12s; gap:12px; }
-  .upcoming .row:hover{ background: rgba(255,255,255,0.02) }
-  .upcoming .date{ font-weight:700; color:#fff }
-  .upcoming .type{ color:var(--muted) }
+  .upcoming{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background: rgba(255,255,255,0.9);border:1px solid rgba(10,20,30,0.04)}
+  .upcoming .row{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;cursor:pointer;transition:background .12s}
+  .upcoming .row:hover{ background: rgba(10,20,30,0.02) }
+  .upcoming .date{font-weight:700;color:#05202b}
+  .upcoming .type{color:var(--muted)}
 
-  .points{ display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02); }
-  .points .score{ font-size:28px;font-weight:900;color:var(--accent);text-shadow:0 8px 24px rgba(255,212,0,0.06) }
-  .points .details{ display:flex;gap:12px;flex-wrap:wrap }
-  .points .detail{ flex:1;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:center }
-  .points .detail strong{ display:block;font-size:18px;color:#fff }
+  .points{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background: rgba(255,255,255,0.9);border:1px solid rgba(10,20,30,0.04)}
+  .points .score{font-size:28px;font-weight:900;color:var(--google-green)}
+  .points .details{display:flex;gap:12px;flex-wrap:wrap}
+  .points .detail{flex:1;padding:10px;border-radius:10px;background:rgba(255,255,255,0.95);text-align:center;border:1px solid rgba(10,20,30,0.03)}
+  .points .detail strong{display:block;font-size:18px;color:#05202b}
 
-  .heat-wrap{overflow:auto;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
+  .heat-wrap{overflow:auto;padding:12px;border-radius:12px;background:rgba(255,255,255,0.9);border:1px solid rgba(10,20,30,0.04)}
   .heat-svg{width:100%;overflow:visible}
-  .heat-tooltip{position:fixed;pointer-events:none;background:linear-gradient(180deg,#0b0b0d,#050507);border-radius:8px;padding:10px 12px;box-shadow:0 20px 60px rgba(0,0,0,0.6);font-size:13px;color:#fff;display:none;z-index:9999}
+  .heat-tooltip{position:fixed;pointer-events:none;background:#ffffff;border-radius:8px;padding:10px 12px;box-shadow:0 20px 60px rgba(12,18,28,0.08);font-size:13px;color:#05202b;display:none;z-index:9999}
 
   .history{max-height:260px;overflow:auto;padding-right:6px}
-  .entry{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;margin-bottom:8px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
-  .tag{padding:6px 8px;border-radius:8px;font-size:13px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.02);color:#fff}
+  .entry{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;margin-bottom:8px;background:rgba(255,255,255,0.95);border:1px solid rgba(10,20,30,0.04)}
+  .tag{padding:6px 8px;border-radius:8px;font-size:13px;background:linear-gradient(180deg,#fff6ec,#fff2e6);border:1px solid rgba(10,20,30,0.03);color:#05202b}
 
-  button:focus, input:focus, select:focus { outline:none; box-shadow:0 0 0 6px rgba(255,212,0,0.06) }
+  button:focus, input:focus, select:focus {outline:none; box-shadow:0 0 0 6px rgba(51,122,255,0.06)}
 
   @media(max-width:520px){
     .today-panel{flex-direction:column;align-items:flex-start}
     .action-area{width:100%;flex-direction:column}
-    .btn-primary{width:100%}
+    .btn-success{width:100%}
   }
 </style>
 </head>
@@ -133,7 +188,7 @@
     <div class="logo">WT</div>
     <div style="flex:1;min-width:0">
       <h1>Workout Tracker</h1>
-      <div class="sub">Today is the focus. Quick mark, upcoming schedule, and points at a glance.</div>
+      <div class="sub">Glassy grey translucent cards — today's card emphasized with a neutral drop shadow (no yellow tint).</div>
     </div>
     <div style="text-align:right">
       <div style="font-weight:700;color:var(--muted);font-size:13px">Chest • Back • Shoulders • Legs</div>
@@ -141,7 +196,8 @@
   </header>
 
   <div class="stack">
-    <div class="card main" id="mainCard">
+    <!-- Main card (today) — extra class today-card -->
+    <div class="card main today-card" id="mainCard">
       <div class="today-row">
         <div class="today-left">
           <div class="today-date" id="todayLabel">Loading…</div>
@@ -163,12 +219,13 @@
         </div>
 
         <div class="action-area">
-          <button class="btn-primary" id="markDone">MARK DONE</button>
-          <button class="btn-secondary" id="markMissed">Mark Missed</button>
+          <button class="btn btn-success" id="markDone">Mark Done</button>
+          <button class="btn btn-danger" id="markMissed">Mark Missed</button>
         </div>
       </div>
 
-      <div style="margin-top:6px" class="controls">
+      <!-- Controls -->
+      <div style="margin-top:12px" class="controls">
         <div>
           <label for="startDate">Start Date</label>
           <input id="startDate" type="date" />
@@ -190,9 +247,9 @@
         </div>
       </div>
 
-      <div style="display:flex;gap:10px;margin-top:10px">
-        <button class="btn-secondary" id="saveOverride">Save</button>
-        <button class="btn-secondary" id="clearDay">Clear Entry</button>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn btn-accent" id="saveOverride">Save</button>
+        <button class="btn btn-secondary btn-ghost" id="clearDay">Clear Entry</button>
       </div>
 
       <div class="stats" style="margin-top:14px">
@@ -210,27 +267,29 @@
         </div>
       </div>
 
-      <div style="margin-top:12px">
+      <div style="margin-top:14px">
         <div class="small" style="color:var(--muted);margin-bottom:8px">Upcoming (next 14 days — workout days only)</div>
         <div id="upcomingList" class="upcoming" aria-live="polite"></div>
       </div>
     </div>
 
+    <!-- Calendar (60 days) -->
     <div class="card section">
-      <h3>Calendar</h3>
+      <h3 style="margin:0 0 8px 0">Calendar</h3>
       <div class="small" style="color:var(--muted)">Last 60 days. Click a day to edit it.</div>
       <div style="margin-top:12px" class="heat-wrap" id="heatContainer"></div>
     </div>
 
+    <!-- Points & Insights -->
     <div class="card section">
-      <h3>Points & Insights</h3>
+      <h3 style="margin:0 0 8px 0">Points & Insights</h3>
 
       <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
-        <div style="flex:1;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02);text-align:center">
+        <div style="flex:1;padding:12px;border-radius:12px;text-align:center">
           <div class="small">Current Streak</div>
           <strong id="currentStreak">0</strong>
         </div>
-        <div style="flex:1;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02);text-align:center">
+        <div style="flex:1;padding:12px;border-radius:12px;text-align:center">
           <div class="small">Best Streak</div>
           <strong id="bestStreak">0</strong>
         </div>
@@ -248,7 +307,7 @@
           </div>
         </div>
 
-        <div class="details" style="display:flex;gap:12px">
+        <div class="details" style="display:flex;gap:12px;margin-top:12px">
           <div class="detail">
             <div class="small">Completed Days</div>
             <strong id="pointsDone">0</strong>
@@ -282,25 +341,34 @@
 <div id="heatTooltip" class="heat-tooltip" role="status" aria-hidden="true"></div>
 
 <script>
-/* ---------- Data model and constants ---------- */
+/* ---------- Full client-side app logic: state, rendering, interactions ---------- */
 const STORAGE_KEY = 'workout-tracker-v1';
 const WORKOUT_TYPES = ["Chest+Triceps","Back+Biceps","Shoulders+Upper Chest","Legs"];
-const HEAT_DAYS = 60; // last 60 days
-const UPCOMING_DAYS = 14; // next 2 weeks
+const HEAT_DAYS = 60;
+const UPCOMING_DAYS = 14;
 const POINTS_PER_DONE = 10;
 const POINTS_PER_MISSED = -15;
-const CELL_SIZE = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--heat-size')) || 14;
-const CELL_GAP = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--heat-gap')) || 6;
+const CELL_SIZE = 14;
+const CELL_GAP = 6;
 
-/* ---------- Helpers ---------- */
-function loadState(){ const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return { startDate:null, entries:{} }; try{return JSON.parse(raw);}catch(e){return { startDate:null, entries:{} };}}
+/* Helpers */
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return { startDate: null, entries: {} };
+    return JSON.parse(raw);
+  }catch(e){
+    return { startDate: null, entries: {} };
+  }
+}
 function saveState(s){ localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 function toISO(d){ return d.toISOString().slice(0,10); }
-function parseISO(s){ const d = new Date(s + 'T00:00:00'); return isNaN(d) ? null : d; }
-function daysBetween(a,b){ const ms = 24*60*60*1000; return Math.floor((b - a) / ms); }
+function parseISO(s){ if(!s) return null; const d = new Date(s + 'T00:00:00'); return isNaN(d) ? null : d; }
 function addDays(d,n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+function daysBetween(a,b){ const ms = 24*60*60*1000; return Math.floor((b - a) / ms); }
 function formatDateISO(iso){ const d = parseISO(iso); if(!d) return iso; return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
 
+/* Expected workout logic (2-on, 1-rest pattern) */
 function expectedFor(dateISO, startISO){
   const date = parseISO(dateISO);
   const start = parseISO(startISO);
@@ -312,7 +380,7 @@ function expectedFor(dateISO, startISO){
   return { isWorkout:true, type: WORKOUT_TYPES[workoutIndex] };
 }
 
-/* ---------- UI elements ---------- */
+/* UI elements */
 const state = loadState();
 const startDateEl = document.getElementById('startDate');
 const viewDateEl = document.getElementById('viewDate');
@@ -341,7 +409,7 @@ const pointsDoneEl = document.getElementById('pointsDone');
 const pointsMissedEl = document.getElementById('pointsMissed');
 const pointsNetEl = document.getElementById('pointsNet');
 
-/* ---------- Initialization ---------- */
+/* Init */
 function init(){
   const todayISO = toISO(new Date());
   if(!state.startDate) state.startDate = todayISO;
@@ -359,7 +427,7 @@ function init(){
 }
 init();
 
-/* ---------- Render functions ---------- */
+/* Render selected date */
 function renderForDate(dateISO){
   const exp = expectedFor(dateISO, state.startDate);
   const entry = state.entries && state.entries[dateISO];
@@ -369,11 +437,11 @@ function renderForDate(dateISO){
 
   if(entry && entry.status === 'done'){
     statusPill.textContent = 'COMPLETED';
-    statusPill.style.background = 'linear-gradient(90deg,var(--accent),var(--accent-2))';
-    statusPill.style.color = '#2b2200';
+    statusPill.style.background = 'linear-gradient(90deg,var(--google-green), #2f9e4a)';
+    statusPill.style.color = '#fff';
   } else if(entry && entry.status === 'missed'){
     statusPill.textContent = 'MISSED';
-    statusPill.style.background = 'linear-gradient(90deg,var(--danger),#ff7b7b)';
+    statusPill.style.background = 'linear-gradient(90deg,var(--google-red), #d93a2a)';
     statusPill.style.color = '#fff';
   } else {
     statusPill.textContent = exp.isWorkout ? 'PLANNED' : 'REST';
@@ -392,6 +460,7 @@ function renderForDate(dateISO){
   }
 }
 
+/* Stats & history */
 function renderStats(){
   const entries = state.entries || {};
   let done=0, missed=0, total=0;
@@ -404,7 +473,6 @@ function renderStats(){
   countMissedEl.textContent = missed;
   countTotalEl.textContent = total;
 }
-
 function renderHistory(){
   historyList.innerHTML = '';
   const entries = state.entries || {};
@@ -419,7 +487,7 @@ function renderHistory(){
   }
 }
 
-/* ---------- Actions ---------- */
+/* Actions */
 startDateEl.addEventListener('change', ()=>{
   state.startDate = startDateEl.value;
   saveState(state);
@@ -427,6 +495,22 @@ startDateEl.addEventListener('change', ()=>{
   renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints();
 });
 viewDateEl.addEventListener('change', ()=> { renderForDate(viewDateEl.value); renderUpcomingSchedule(); });
+
+/* Ripple helper for buttons */
+function attachRipple(btn){
+  btn.addEventListener('click', function(e){
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size = Math.max(rect.width, rect.height) * 1.2;
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(()=> ripple.remove(), 650);
+  });
+}
+document.querySelectorAll('.btn').forEach(attachRipple);
 
 markDoneBtn.addEventListener('click', ()=>{
   const d = viewDateEl.value;
@@ -459,7 +543,7 @@ clearDayBtn.addEventListener('click', ()=>{
   renderForDate(d); renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints();
 });
 
-/* ---------- Upcoming schedule (next 14 days, skip rest days) ---------- */
+/* Upcoming schedule (next 14 days, skip rest days) */
 function renderUpcomingSchedule(){
   upcomingList.innerHTML = '';
   const today = parseISO(viewDateEl.value || toISO(new Date()));
@@ -490,7 +574,7 @@ function renderUpcomingSchedule(){
   }
 }
 
-/* ---------- Points calculation & render ---------- */
+/* Points calculation & render */
 function renderPoints(){
   const entries = state.entries || {};
   let done = 0, missed = 0;
@@ -507,7 +591,7 @@ function renderPoints(){
   pointsNetEl.textContent = total;
 }
 
-/* ---------- Streaks & Monthly ---------- */
+/* Streaks & monthly */
 function computeStreaksAndMonthly(){
   const entries = state.entries || {};
   const today = new Date();
@@ -582,12 +666,12 @@ function computeStreaksAndMonthly(){
     const label = new Date(k + '-01').toLocaleDateString(undefined,{month:'short',year:'numeric'});
     const item = document.createElement('div');
     item.className = 'month-item';
-    item.innerHTML = `<div style="font-weight:700">${label}</div><div class="small">${m.done}/${m.scheduled} workouts</div><div class="bar"><i style="width:${pct}%;"></i></div>`;
+    item.innerHTML = `<div style="font-weight:700">${label}</div><div class="small">${m.done}/${m.scheduled} workouts</div><div class="bar" style="height:8px;border-radius:6px;background:rgba(10,20,30,0.03);margin-top:8px;overflow:hidden"><i style="display:block;height:100%;background:linear-gradient(90deg,var(--google-orange),var(--google-green));width:${pct}%;border-radius:6px"></i></div>`;
     monthListEl.appendChild(item);
   }
 }
 
-/* ---------- Heatmap rendering (60 days) ---------- */
+/* Heatmap rendering (60 days) */
 function getHeatColorForDate(iso){
   const entries = state.entries || {};
   const e = entries[iso];
@@ -598,7 +682,7 @@ function getHeatColorForDate(iso){
   }
   const exp = expectedFor(iso, state.startDate);
   if(exp && exp.type === 'Rest') return getComputedStyle(document.documentElement).getPropertyValue('--rest').trim();
-  return 'rgba(255,255,255,0.03)';
+  return 'rgba(10,20,30,0.03)';
 }
 function isDateInBestRanges(iso){
   const ranges = state._bestStreakRanges || [];
@@ -646,15 +730,15 @@ function renderHeatmap(){
         rect.setAttribute('opacity', '0.03');
       } else {
         rect.setAttribute('fill', getHeatColorForDate(iso));
-        rect.setAttribute('stroke', 'rgba(255,255,255,0.03)');
+        rect.setAttribute('stroke', 'rgba(10,20,30,0.03)');
         rect.setAttribute('stroke-width', '1');
       }
       if(iso === toISO(new Date())){
-        rect.setAttribute('stroke','#ffd400');
+        rect.setAttribute('stroke','#34a853'); /* neutral highlight for today */
         rect.setAttribute('stroke-width','2');
       }
       if(withinRange && isDateInBestRanges(iso)){
-        rect.setAttribute('stroke','#ffcf33');
+        rect.setAttribute('stroke','#34a853');
         rect.setAttribute('stroke-width','2');
       }
       rect.addEventListener('mouseenter', (ev)=>{
@@ -664,7 +748,7 @@ function renderHeatmap(){
         const status = e ? (e.status === 'done' ? 'Done' : (e.status === 'missed' ? 'Missed' : 'Recorded')) : (expectedFor(d, state.startDate).type === 'Rest' ? 'Rest' : 'No entry');
         const type = e && e.type ? e.type : expectedFor(d, state.startDate).type || '—';
         heatTooltip.style.display = 'block';
-        heatTooltip.innerHTML = `<strong style="color:#fff">${formatDateISO(d)}</strong><div style="margin-top:6px;color:var(--muted)">${status} • ${type}</div>`;
+        heatTooltip.innerHTML = `<strong style="color:#05202b">${formatDateISO(d)}</strong><div style="margin-top:6px;color:var(--muted)">${status} • ${type}</div>`;
       });
       rect.addEventListener('mousemove', (ev)=>{
         heatTooltip.style.left = (ev.pageX + 12) + 'px';
@@ -684,12 +768,8 @@ function renderHeatmap(){
   heatContainer.appendChild(svg);
 }
 
-/* ---------- Buttons ---------- */
-document.getElementById('heatExport')?.addEventListener('click', ()=>{ /* optional export kept out of scope */ });
-document.getElementById('heatRefresh')?.addEventListener('click', ()=>{ computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints(); });
-
-/* ---------- Resize ---------- */
-window.addEventListener('resize', ()=> renderHeatmap());
+/* Expose a small API for debugging */
+window.__workoutTracker = { state, save: ()=> saveState(state), renderAll: ()=> { renderForDate(viewDateEl.value); renderStats(); renderHistory(); computeStreaksAndMonthly(); renderHeatmap(); renderUpcomingSchedule(); renderPoints(); } };
 </script>
 </body>
 </html>
